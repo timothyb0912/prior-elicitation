@@ -7,6 +7,7 @@ import attr
 import botorch.optim.numpy_converter as numpy_converter
 import botorch.optim.utils as optim_utils
 import numpy as np
+import torch
 from botorch.optim.numpy_converter import TorchAttr
 
 
