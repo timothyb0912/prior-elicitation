@@ -36,32 +36,28 @@ class LinearGLM(nn.Module):
         )
 
     def forward(self, input_obj: torch.Tensor) -> torch.Tensor:
-        raw_outputs = self.linear_model(input_obj)
-        positive_outputs = nn.functional.softplus(raw_outputs)
-        return positive_outputs
+        location_params = torch.matmul(input_obj, self.weights)
+        scale_params = self.scale * torch.ones(input_obj.size()[0])
+        outputs = torch.cat(
+            [location_params[:, None], scale_params[:, None]], dim=1
+        )
+        return outputs
 
-    def simulate(self, input_obj: torch.Tensor, num_sim: int) -> torch.Tensor:
+    def simulate(
+        self,
+        input_obj: torch.Tensor,
+        num_sim: int,
+        seed: Optional[int] = None,
+    ) -> torch.Tensor:
+        if seed:
+            torch.manual_seed(seed)
         # Get the predicted location and scale parameters
         predictions = self.forward(input_obj)
         locations, scales = predictions[:, 0], predictions[:, 1]
-        # Build a Folded Logistic Distribution
-        # X ~ Uniform(0, 1)
-        # f = a + b * logit(X)
-        # Y ~ f(X) ~ Logistic(a, b)
-        # Z ~ |Y| ~ FoldedLogistic(a, b)
-        base_distribution = dists.Uniform(0, 1)
-        transforms = [
-            dists.transforms.SigmoidTransform().inv,
-            dists.transforms.AffineTransform(loc=locations, scale=scales),
-            dists.transforms.AbsTransform(),
-        ]
-        folded_logistic_dists = (
-            dists.transformed_distribution.TransformedDistribution(
-                base_distribution, transforms
-            )
-        )
+        # Get the current distributions
+        current_dists = dists.Normal(loc=locations, scale=scales)
         # Sample from the distributions
-        samples = folded_logistic_dists.sample_n(num_sim)
+        samples = current_dists.sample((num_sim,))
         return samples
 
     def get_params_numpy(self) -> Tuple[
