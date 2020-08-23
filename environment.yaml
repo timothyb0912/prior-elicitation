@@ -19,6 +19,8 @@ dependencies:
   - watermark==2.0.2
   - pip:
      # add here only pip-packages that are not available in conda/conda-forge! E.g.:
+     - botorch==0.3.0
+     - gpytorch==1.1.1
      - pyscaffoldext-dsproject==0.4
      - streamlit==0.65.0
      - torch==1.6.0
