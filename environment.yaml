@@ -5,6 +5,7 @@ channels:
   - conda-forge
 dependencies:
   - black==19.10b0
+  - cattrs==1.0.0
   - jupytext==1.5.2
   - pip==20.2.2
   - pre-commit==2.7.0
