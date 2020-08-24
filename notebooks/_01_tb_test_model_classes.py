@@ -22,9 +22,9 @@ from sklearn.datasets import load_boston
 
 from prior_elicitation.models.folded_logistic_glm import FoldedLogisticGLM
 from prior_elicitation.models.linear_glm import LinearGLM
-# -
 
-# Parameters
+# + tags=["parameters"]
+#parameters
 MODEL: str = "folded-logistic"
 COLUMN: str = "intercept"
 PERCENTILE: int = 25
@@ -47,9 +47,11 @@ PRIOR_INFO: dict = {
 NUM_PRIOR_SIM: int = 100  # Establish a number of simulations from the prior
 SEED: int = 129  # What's the random seed for reproducibility
 PLOT_PATH: str = (
-    "../reports/figures/_001/25th_percentile_intercept_times_outcome.png"
+#     "../reports/figures/_001/25th_percentile_intercept_times_outcome.png"
+    "../reports/figures/test_plot.png"
 )
 SAVE: bool = True
+# -
 
 # # Load and transform data
 
