@@ -155,8 +155,12 @@ def make_percentile_plot(
     percentiles_of_sim_product = calc_percentile_func(sim_product)
     percentiles_of_obs_product = calc_percentile_func(obs_product)
 
+    p_value = (percentiles_of_sim_product > percentiles_of_obs_product).mean()
+
     sim_label = "Simulated"
-    obs_label = "Observed = {:.1f}".format(percentiles_of_obs_product)
+    obs_label = "Observed = {:.1f}\nP-value = {:.0%}".format(
+        percentiles_of_obs_product, p_value
+    )
 
     plot = sbn.distplot(
         percentiles_of_sim_product, kde=False, hist=True, label=sim_label
