@@ -46,6 +46,10 @@ PRIOR_INFO: dict = {
     'scale': {'c': 0, 'dist': 'foldnorm', 'loc': 10, 'scale': 1}}
 NUM_PRIOR_SIM: int = 100  # Establish a number of simulations from the prior
 SEED: int = 129  # What's the random seed for reproducibility
+PLOT_PATH: str = (
+    "../reports/figures/_001/25th_percentile_intercept_times_outcome.png"
+)
+SAVE: bool = True
 
 # # Load and transform data
 
@@ -57,7 +61,9 @@ training_design_np = np.concatenate(
     (np.ones((training_num_obs, 1)), raw_design), axis=1
 )
 training_outcomes_np = data_container["target"].ravel()
-training_design_column_names = ["intercept"] + [col for col in data_container["feature_names"]]
+training_design_column_names = (
+    ["intercept"] + [col for col in data_container["feature_names"]]
+)
 
 
 # # Load models
@@ -106,7 +112,7 @@ for pos, key in enumerate(training_design_column_names):
             scale = PRIOR_INFO[key]["scale"],
             size=NUM_PRIOR_SIM,
         )
-    
+
 print(prior_sim_parameters.shape)
 # -
 
@@ -123,7 +129,7 @@ with torch.no_grad():
         current_params = prior_sim_parameters[:, i]
         current_model.set_params_numpy(current_params)
         prior_sim_outcomes[:, i] = current_model.simulate(training_design_torch, num_sim=1).numpy()
-        
+
 print(prior_sim_outcomes.shape)
 
 
@@ -139,7 +145,7 @@ def percentile_closure(percentile):
 
 
 def make_percentile_plot(
-    calc_percentile_func, design, obs_outcomes, sim_outcomes, col_names,
+    calc_percentile_func, design, obs_outcomes, sim_outcomes, col_names, save
 ):
     column_idx = col_names.index(COLUMN)
     sim_product = sim_outcomes * design[:, column_idx][:, None]
@@ -147,9 +153,9 @@ def make_percentile_plot(
     percentiles_of_sim_product = calc_percentile_func(sim_product)
     percentiles_of_obs_product = calc_percentile_func(obs_product)
 
-    sim_label = "Simulated".format(PERCENTILE)
+    sim_label = "Simulated"
     obs_label = "Observed = {:.1f}".format(percentiles_of_obs_product)
-    
+
     plot = sbn.distplot(
         percentiles_of_sim_product, kde=False, hist=True, label=sim_label
     )
@@ -163,14 +169,19 @@ def make_percentile_plot(
         color="black",
     )
     plot.legend(loc="best")
-    
-    xlabel = "{}-Percentile of [Median Home Value * {}]".format(PERCENTILE, COLUMN)
+
+    xlabel = (
+        "{}-Percentile of [Median Home Value * {}]".format(PERCENTILE, COLUMN)
+    )
     plot.set_xlabel(xlabel)
     plot.set_ylabel("Count", rotation=0, labelpad=40)
     plot.set_title(MODEL)
-    
+
     plot.figure.set_size_inches(10, 6)
     sbn.despine()
+    plot.figure.tight_layout()
+    if save:
+        plot.figure.savefig(PLOT_PATH, dpi=500, bbox_inches="tight")
     return plot
 
 calc_percentile = percentile_closure(PERCENTILE)
@@ -181,6 +192,7 @@ percentile_plot = make_percentile_plot(
     training_outcomes_np,
     prior_sim_outcomes,
     training_design_column_names,
+    SAVE,
 )
 # -
 
