@@ -14,6 +14,9 @@
 # ---
 
 # +
+import os
+import random
+
 import numpy as np
 import scipy.stats
 import seaborn as sbn
@@ -45,7 +48,7 @@ PRIOR_INFO: dict = {
     'intercept': {'dist': 'norm', 'loc': 0, 'scale': 1},
     'scale': {'c': 0, 'dist': 'foldnorm', 'loc': 10, 'scale': 1}}
 NUM_PRIOR_SIM: int = 100  # Establish a number of simulations from the prior
-SEED: int = 129  # What's the random seed for reproducibility
+SEED: int = 29  # What's the random seed for reproducibility
 PLOT_PATH: str = (
 #     "../reports/figures/_001/25th_percentile_intercept_times_outcome.png"
     "../reports/figures/test_plot.png"
@@ -66,6 +69,7 @@ training_outcomes_np = data_container["target"].ravel()
 training_design_column_names = (
     ["intercept"] + [col for col in data_container["feature_names"]]
 )
+parameter_names = training_design_column_names + ["scale"]
 
 
 # # Load models
@@ -87,25 +91,19 @@ with torch.no_grad():
 model_dict = {"folded-logistic": folded_logistic_model, "linear": linear_model}
 current_model = model_dict[MODEL]
 
-# Create a default prior
-if PRIOR_INFO is None:
-    PRIOR_INFO = {}
-    for key in training_design_column_names:
-        PRIOR_INFO.update({key: {"dist": "norm", "loc": 0, "scale": 1}})
-    PRIOR_INFO.update({"scale": {"dist": "foldnorm", "c": 0, "loc": 10, "scale": 1}})
-
 # Set a random seed for reproducility
 np.random.seed(SEED)
+torch.manual_seed(SEED)
 
 # Simulate parameters from the prior
 prior_sim_parameters = np.empty((len(PRIOR_INFO), NUM_PRIOR_SIM), dtype=float)
 
-for pos, key in enumerate(training_design_column_names):
+for pos, key in enumerate(parameter_names):
     if PRIOR_INFO[key]["dist"] == "norm":
         prior_sim_parameters[pos, :] = scipy.stats.norm.rvs(
             loc = PRIOR_INFO[key]["loc"],
             scale = PRIOR_INFO[key]["scale"],
-            size=NUM_PRIOR_SIM,
+            size = NUM_PRIOR_SIM,
         )
     elif PRIOR_INFO[key]["dist"] == "foldnorm":
         prior_sim_parameters[pos, :] = scipy.stats.foldnorm.rvs(
@@ -125,15 +123,12 @@ print(prior_sim_parameters.shape)
 prior_sim_outcomes = np.empty((training_design_np.shape[0], NUM_PRIOR_SIM), dtype=float)
 
 with torch.no_grad():
-    # Set a seed for reproducibility
-    torch.manual_seed(SEED)
     for i in range(NUM_PRIOR_SIM):
         current_params = prior_sim_parameters[:, i]
         current_model.set_params_numpy(current_params)
-        prior_sim_outcomes[:, i] = current_model.simulate(training_design_torch, num_sim=1).numpy()
-
-print(prior_sim_outcomes.shape)
-
+        prior_sim_outcomes[:, i] = current_model.simulate(
+            training_design_torch, num_sim=1,
+        ).ravel()
 
 # -
 
@@ -172,6 +167,24 @@ def make_percentile_plot(
         ymax,
         label=obs_label,
         linestyle="dashed",
+        color="black",
+    )
+
+    plot.vlines(
+        obs_product.min(),
+        ymin,
+        ymax,
+        label="Minimum Outcome * {}".format(COLUMN),
+        linestyle="dotted",
+        color="black",
+    )
+
+    plot.vlines(
+        obs_product.max(),
+        ymin,
+        ymax,
+        label="Maximum Outcome * {}".format(COLUMN),
+        linestyle="dashdot",
         color="black",
     )
     plot.legend(loc="best")
