@@ -60,7 +60,7 @@ def make_distribution_box(param_name: str) -> str:
     )
 
 def make_location_slider(param_name: str) -> int:
-    location_value = 10 if param_name == "scale" else 0
+    location_value = 1 if param_name == "scale" else 0
     slider_min = 0 if param_name == "scale" else -10
     slider_max = 20 if param_name == "scale" else 10
     slider_description = "What location parameter for {}?".format(param_name)
@@ -72,7 +72,7 @@ def make_location_slider(param_name: str) -> int:
     )
 
 def make_scale_slider(param_name: str) -> int:
-    scale_value = 1.0
+    scale_value = 0.5
     slider_min = 0.5
     slider_max = 5.0
     slider_step = 0.5
