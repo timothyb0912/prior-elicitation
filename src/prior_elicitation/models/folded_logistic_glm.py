@@ -2,10 +2,11 @@
 Pytorch implementation of a folded logistic regression model. Provides an
 outcome distribution for modelling non-negative outcomes.
 """
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import attr
 import numpy as np
+import scipy.stats
 import torch
 import torch.distributions as dists
 import torch.nn as nn
@@ -37,6 +38,8 @@ class FoldedLogisticGLM(nn.Module):
     def forward(self, input_obj: torch.Tensor) -> torch.Tensor:
         raw_outputs = self.linear_model(input_obj)
         positive_outputs = nn.functional.softplus(raw_outputs)
+        # Make sure scales are nonzero
+        positive_outputs[:, 1] = torch.clamp(positive_outputs[:, 1], min=1e-20)
         return positive_outputs
 
     def simulate(
@@ -44,8 +47,8 @@ class FoldedLogisticGLM(nn.Module):
         input_obj: torch.Tensor,
         num_sim: int,
         seed: Optional[int] = None,
-    ) -> torch.Tensor:
-        if seed:
+    ) -> np.ndarray:
+        if seed is not None:
             torch.manual_seed(seed)
         # Get the predicted location and scale parameters
         predictions = self.forward(input_obj)
@@ -68,7 +71,7 @@ class FoldedLogisticGLM(nn.Module):
         )
         # Sample from the distributions
         samples = folded_logistic_dists.sample((num_sim,))
-        return samples
+        return samples.numpy()
 
     def get_params_numpy(self) -> Tuple[
             np.ndarray, Dict[str, TorchAttr], Optional[np.ndarray]

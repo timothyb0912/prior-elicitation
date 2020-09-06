@@ -48,8 +48,8 @@ class LinearGLM(nn.Module):
         input_obj: torch.Tensor,
         num_sim: int,
         seed: Optional[int] = None,
-    ) -> torch.Tensor:
-        if seed:
+    ) -> np.ndarray:
+        if seed is not None:
             torch.manual_seed(seed)
         # Get the predicted location and scale parameters
         predictions = self.forward(input_obj)
@@ -58,7 +58,7 @@ class LinearGLM(nn.Module):
         current_dists = dists.Normal(loc=locations, scale=scales)
         # Sample from the distributions
         samples = current_dists.sample((num_sim,))
-        return samples
+        return samples.numpy()
 
     def get_params_numpy(self) -> Tuple[
         np.ndarray, Dict[str, TorchAttr], Optional[np.ndarray]
