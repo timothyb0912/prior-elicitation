@@ -43,10 +43,24 @@ COLUMN = st.selectbox(
 #####
 # Create button for each parameter
 #####
-params_to_set = st.multiselect(
-    "Which priors should we view/set/adjust?",
-    param_list,
-    default=["intercept", "scale"]
+adjust_all_priors = st.checkbox(
+"Adjust priors for all variables?", value=False
+)
+
+if adjust_all_priors:
+    params_to_set = param_list
+else:
+    params_to_set = st.multiselect(
+        "Which priors should we view/set/adjust?",
+        param_list,
+        default=["intercept", "scale"]
+    )
+
+default_scale = st.number_input(
+    label = "What default scale to use in the priors?",
+    min_value = 0.01,
+    max_value = 20.0,
+    value = 5.0,
 )
 
 def make_distribution_box(param_name: str) -> str:
@@ -60,20 +74,22 @@ def make_distribution_box(param_name: str) -> str:
     )
 
 def make_location_slider(param_name: str) -> int:
-    location_value = 1 if param_name == "scale" else 0
-    slider_min = 0 if param_name == "scale" else -10
-    slider_max = 20 if param_name == "scale" else 10
+    location_value = 1.0 if param_name == "scale" else 0.0
+    slider_min = 0.0 if param_name == "scale" else -10.0
+    slider_max = 20.0 if param_name == "scale" else 10.0
+    slider_step = 0.5 if param_name == "scale" else 1.0
     slider_description = "What location parameter for {}?".format(param_name)
     return st.slider(
         slider_description,
         min_value = slider_min,
         max_value = slider_max,
         value = location_value,
+        step = slider_step,
     )
 
-def make_scale_slider(param_name: str) -> int:
-    scale_value = 0.5
-    slider_min = 0.5
+def make_scale_slider(param_name: str, default: float = default_scale) -> int:
+    scale_value = 0.01 if param_name == "scale" else default
+    slider_min = 0.01
     slider_max = 5.0
     slider_step = 0.5
     slider_description = "What scale parameter for {}?".format(param_name)
@@ -82,7 +98,7 @@ def make_scale_slider(param_name: str) -> int:
         min_value = slider_min,
         max_value = slider_max,
         value = scale_value,
-        step = slider_step
+        step = slider_step,
     )
 
 param_display_options = {}
