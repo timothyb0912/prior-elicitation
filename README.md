@@ -1,10 +1,13 @@
 # prior_elicitation
 
-Add a short description here!
+Interactive prior elicitation via prior predictive checks.
 
 ## Description
 
-A longer description of your project goes here...
+Gelman et al. (2017[^1]) note that "[t]he prior can often only be understood in the context of the likelihood."
+As they point out, the prior predictive distribution is "a fundamental tool for understanding the effect of the prior on inference before data has been collected."
+Indeed, one understands the implications of one's prior by iteratively specifying a prior and then viewing its prior predictive distribution.
+This repository investigates and demonstrates how to specify one's prior based on such iterative understanding processes.
 
 ## Installation
 
@@ -103,3 +106,5 @@ For details and usage information on PyScaffold see https://pyscaffold.org/.
 [nbstripout]: https://github.com/kynan/nbstripout
 [Google style]: http://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings
 [dsproject extension]: https://github.com/pyscaffold/pyscaffoldext-dsproject
+
+[^1]: Gelman, Andrew, Daniel Simpson, and Michael Betancourt. "The prior can often only be understood in the context of the likelihood." Entropy 19, no. 10 (2017): 555.

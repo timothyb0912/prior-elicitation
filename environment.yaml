@@ -1,34 +1,30 @@
 name: prior_elicitation
 channels:
+  - pytorch
   - defaults
   - conda-forge
-  - pytorch
 dependencies:
-  - python>=3.6
-  - pip
-  - numpy
-  - scipy
-  - pandas
-  - dask
-  - ipython
-  - tqdm
-  - click
-  - matplotlib
-  - seaborn
-  - altair
-  - statsmodels
-  - scikit-learn
-  - pytorch
+  - black==19.10b0
+  - cattrs==1.0.0
+  - jupytext==1.5.2
+  - pip==20.2.2
+  - pre-commit==2.7.0
+  - pytest==6.0.1
+  - pytest-cov==2.10.1
+  - python==3.7
+  - scikit-learn==0.23.2
+  - seaborn==0.10.1
+  - sphinx==3.2.1
+  - tqdm==4.48.2
+  - watermark==2.0.2
   - pip:
      # add here only pip-packages that are not available in conda/conda-forge! E.g.:
-     - optuna
+     - botorch==0.3.0
+     - gpytorch==1.1.1
+     - pyscaffoldext-dsproject==0.4
+     - streamlit==0.65.0
+     - torch==1.6.0
   # for development only (could also be kept in a separate environment file)
-  - jupyterlab
-  - pytest
-  - pytest-cov
-  - tox
-  - pre_commit
-  - nbdime
-  - nbstripout
-  - sphinx
-  - recommonmark
+  # - jupyterlab
+  # - tox
+  # - recommonmark
