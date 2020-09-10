@@ -170,20 +170,24 @@ def make_percentile_plot(
         color="black",
     )
 
+    max_obs_product = obs_product.max()
+    min_obs_product = obs_product.min()
+
     plot.vlines(
         obs_product.min(),
         ymin,
         ymax,
-        label="Minimum Outcome * {}".format(COLUMN),
+        label=f"Minimum Outcome * {COLUMN} = {min_obs_product}",
         linestyle="dotted",
         color="black",
     )
+
 
     plot.vlines(
         obs_product.max(),
         ymin,
         ymax,
-        label="Maximum Outcome * {}".format(COLUMN),
+        label=f"Maximum Outcome * {COLUMN} = {max_obs_product}",
         linestyle="dashdot",
         color="black",
     )
